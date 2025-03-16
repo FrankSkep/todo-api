@@ -7,7 +7,7 @@ class TaskRepository:
         self.db = db
     
     def create_task(self, task: TaskCreate):
-        db_task = Task(**task.dict())
+        db_task = Task(**task.model_dump())
         self.db.add(db_task)
         self.db.commit()
         self.db.refresh(db_task)
