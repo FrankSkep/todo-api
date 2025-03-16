@@ -4,20 +4,20 @@ from main import create_app
 from database import Base, engine, get_db
 from sqlalchemy.orm import sessionmaker
 
-# Configuración de la base de datos para pruebas
+# Database configuration for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Crear una aplicación de prueba
+# Create a test application
 app = create_app()
 
-# Crear un cliente de prueba
+# Create a test client
 client = TestClient(app)
 
-# Crear la base de datos de prueba
+# Create the test database
 Base.metadata.create_all(bind=engine)
 
-# Dependencia de prueba para obtener la base de datos
+# Test dependency to get the database
 def override_get_db():
     try:
         db = TestingSessionLocal()
@@ -27,7 +27,7 @@ def override_get_db():
 
 app.dependency_overrides[get_db] = override_get_db
 
-# Prueba para crear una tarea
+# Test to create a task
 def test_create_task():
     response = client.post(
         "/api/tasks",
@@ -38,36 +38,36 @@ def test_create_task():
     assert response.json()["description"] == "This is a test task"
     assert response.json()["done"] == False
 
-# Prueba para obtener todas las tareas
+# Test to get all tasks
 def test_get_tasks():
     response = client.get("/api/tasks")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
 
-# Prueba para obtener una tarea por ID
+# Test to get a task by ID
 def test_get_task():
-    # Crear una tarea primero
+    # Create a task first
     create_response = client.post(
         "/api/tasks",
         json={"title": "Test Task", "description": "This is a test task", "done": False},
     )
     task_id = create_response.json()["id"]
 
-    # Obtener la tarea por ID
+    # Get the task by ID
     response = client.get(f"/api/tasks/{task_id}")
     assert response.status_code == 200
     assert response.json()["id"] == task_id
 
-# Prueba para actualizar una tarea
+# Test to update a task
 def test_update_task():
-    # Crear una tarea primero
+    # Create a task first
     create_response = client.post(
         "/api/tasks",
         json={"title": "Test Task", "description": "This is a test task", "done": False},
     )
     task_id = create_response.json()["id"]
 
-    # Actualizar la tarea
+    # Update the task
     update_response = client.put(
         f"/api/tasks/{task_id}",
         json={"title": "Updated Task", "description": "This is an updated test task", "done": True},
@@ -77,20 +77,20 @@ def test_update_task():
     assert update_response.json()["description"] == "This is an updated test task"
     assert update_response.json()["done"] == True
 
-# Prueba para eliminar una tarea
+# Test to delete a task
 def test_delete_task():
-    # Crear una tarea primero
+    # Create a task first
     create_response = client.post(
         "/api/tasks",
         json={"title": "Test Task", "description": "This is a test task", "done": False},
     )
     task_id = create_response.json()["id"]
 
-    # Eliminar la tarea
+    # Delete the task
     delete_response = client.delete(f"/api/tasks/{task_id}")
     assert delete_response.status_code == 200
     assert delete_response.json()["id"] == task_id
 
-    # Verificar que la tarea ha sido eliminada
+    # Verify that the task has been deleted
     get_response = client.get(f"/api/tasks/{task_id}")
     assert get_response.status_code == 404
