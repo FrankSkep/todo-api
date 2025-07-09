@@ -11,14 +11,8 @@ class TaskCreate(TaskBase):
 class TaskUpdate(TaskBase):
     pass
 
-class TaskInDBBase(TaskBase):
+class Task(TaskBase):
     id: int
 
     class Config:
         from_attributes = True
-
-class Task(TaskInDBBase):
-    pass
-
-class TaskInDB(TaskInDBBase):
-    pass
